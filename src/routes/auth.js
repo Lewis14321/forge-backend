@@ -28,6 +28,7 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({ id: rows[0].id, role: rows[0].role, is_admin: false }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ user: rows[0], token });
   } catch (err) {
+    console.error('Registration error:', err.message);
     if (err.code === '23505') return res.status(409).json({ error: 'Email already in use' });
     res.status(500).json({ error: 'Server error' });
   }
