@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('dns').setDefaultResultOrder('ipv4first');
 const Sentry = require('@sentry/node');
 const express = require('express');
 const cors = require('cors');
@@ -73,4 +74,10 @@ app.use((err, req, res, _next) => {
 });
 
 const PORT = process.env.PORT || 4000;
+console.log('=== Environment Debug ===');
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_USER:', process.env.DB_USER);
+console.log('DB_PORT:', process.env.DB_PORT);
+console.log('DB_NAME:', process.env.DB_NAME);
+console.log('========================');
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
