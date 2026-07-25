@@ -80,4 +80,20 @@ console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_PORT:', process.env.DB_PORT);
 console.log('DB_NAME:', process.env.DB_NAME);
 console.log('========================');
+
+// Test network connectivity
+const https = require('https');
+https.get('https://www.google.com', (res) => {
+  console.log('✓ Can reach Google:', res.statusCode);
+}).on('error', (err) => {
+  console.log('✗ Cannot reach Google:', err.message);
+});
+
+// Test DNS resolution
+const dns = require('dns').promises;
+dns.resolve4(process.env.DB_HOST).then(
+  (ips) => console.log('✓ DNS resolved DB_HOST to:', ips),
+  (err) => console.log('✗ DNS failed for DB_HOST:', err.message)
+);
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
