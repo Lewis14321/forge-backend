@@ -75,10 +75,9 @@ app.use((err, req, res, _next) => {
 
 const PORT = process.env.PORT || 4000;
 console.log('=== Environment Debug ===');
-console.log('DB_HOST:', process.env.DB_HOST);
-console.log('DB_USER:', process.env.DB_USER);
-console.log('DB_PORT:', process.env.DB_PORT);
-console.log('DB_NAME:', process.env.DB_NAME);
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'MISSING');
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('PORT:', process.env.PORT);
 console.log('========================');
 
 // Test network connectivity
