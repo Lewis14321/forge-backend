@@ -88,11 +88,14 @@ https.get('https://www.google.com', (res) => {
   console.log('✗ Cannot reach Google:', err.message);
 });
 
-// Test DNS resolution
-const dns = require('dns').promises;
-dns.resolve4(process.env.DB_HOST).then(
-  (ips) => console.log('✓ DNS resolved DB_HOST to:', ips),
-  (err) => console.log('✗ DNS failed for DB_HOST:', err.message)
-);
+// Test DNS resolution of database host
+if (process.env.DATABASE_URL) {
+  const url = new URL(process.env.DATABASE_URL);
+  const dns = require('dns').promises;
+  dns.resolve4(url.hostname).then(
+    (ips) => console.log('✓ DNS resolved database host to:', ips),
+    (err) => console.log('✗ DNS failed for database host:', err.message)
+  );
+}
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
