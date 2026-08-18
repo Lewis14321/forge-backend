@@ -207,7 +207,7 @@ router.post('/:id/fund', auth, requireRole('creator', 'both'), async (req, res) 
     await client.query('BEGIN');
 
     const { rows: ms } = await client.query(
-      `SELECT m.*, p.creator_id, p.funded, p.available_balance, p.title AS project_title
+      `SELECT m.*, p.creator_id, p.funded, p.available_balance, p.title AS project_title, p.project_type
        FROM milestones m JOIN projects p ON m.project_id = p.id WHERE m.id = $1 FOR UPDATE`,
       [req.params.id]
     );
@@ -218,7 +218,7 @@ router.post('/:id/fund', auth, requireRole('creator', 'both'), async (req, res) 
       await client.query('ROLLBACK');
       return res.status(403).json({ error: 'Forbidden' });
     }
-    if (!milestone.funded) {
+    if (milestone.project_type === 'funded' && !milestone.funded) {
       await client.query('ROLLBACK');
       return res.status(409).json({ error: 'Project must be funded before allocating milestone payments' });
     }
