@@ -361,6 +361,27 @@ router.post('/:id/release', auth, requireRole('creator', 'both'), async (req, re
   }
 });
 
+// PATCH /milestones/:id — update milestone (creator only)
+router.patch('/:id', auth, requireRole('creator', 'both'), async (req, res) => {
+  const { deadline } = req.body;
+  try {
+    const milestone = await pool.query(
+      'SELECT m.*, p.creator_id FROM milestones m JOIN projects p ON m.project_id = p.id WHERE m.id = $1',
+      [req.params.id]
+    );
+    if (!milestone.rows.length) return res.status(404).json({ error: 'Milestone not found' });
+    if (milestone.rows[0].creator_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+
+    const { rows } = await pool.query(
+      'UPDATE milestones SET deadline = $1 WHERE id = $2 RETURNING *',
+      [deadline || null, req.params.id]
+    );
+    res.json(rows[0]);
+  } catch {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /milestones/project/:projectId
 router.get('/project/:projectId', auth, async (req, res) => {
   try {
