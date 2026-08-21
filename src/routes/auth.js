@@ -175,8 +175,9 @@ router.post('/switch-role', require('../middleware/auth').auth, async (req, res)
       user.role = 'both';
     }
 
-    // Return updated user with new role
+    // Return updated user with new role and current_role
     const { password: _, ...safeUser } = user;
+    safeUser.current_role = target_role;
     const token = jwt.sign({ id: user.id, role: user.role, is_admin: user.is_admin || false, current_role: target_role }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ user: safeUser, token });
   } catch (err) {
