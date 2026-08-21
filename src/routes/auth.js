@@ -156,4 +156,33 @@ router.patch('/me', require('../middleware/auth').auth, async (req, res) => {
   }
 });
 
+router.post('/switch-role', require('../middleware/auth').auth, async (req, res) => {
+  const { target_role, password } = req.body;
+  if (!target_role || !password) return res.status(400).json({ error: 'target_role and password required' });
+  if (!['creator', 'builder'].includes(target_role)) return res.status(400).json({ error: 'Invalid role' });
+
+  try {
+    const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+
+    const user = rows[0];
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: 'Invalid password' });
+
+    // Update role to 'both' if not already
+    if (user.role !== 'both') {
+      await pool.query('UPDATE users SET role = $1 WHERE id = $2', ['both', req.user.id]);
+      user.role = 'both';
+    }
+
+    // Return updated user with new role
+    const { password: _, ...safeUser } = user;
+    const token = jwt.sign({ id: user.id, role: user.role, is_admin: user.is_admin || false, current_role: target_role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.json({ user: safeUser, token });
+  } catch (err) {
+    console.error('switch-role error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
